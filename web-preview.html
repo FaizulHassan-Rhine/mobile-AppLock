@@ -1,0 +1,1183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FocusLock Professional UI Preview</title>
+    <style>
+      :root {
+        --bg: #0b0b10;
+        --surface: #14141c;
+        --surface-soft: #1b1b25;
+        --border: #252534;
+        --primary: #7c3aed;
+        --primary-soft: rgba(124, 58, 237, 0.2);
+        --text: #f8fafc;
+        --muted: #9ca3af;
+        --ok: #22c55e;
+        --warn: #f59e0b;
+        --danger: #ef4444;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family:
+          Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+        background:
+          radial-gradient(1000px 600px at 10% -20%, #2b1460 0%, transparent 45%),
+          radial-gradient(900px 700px at 100% 0%, #10194a 0%, transparent 40%),
+          var(--bg);
+        color: var(--text);
+        display: grid;
+        place-items: center;
+        padding: 18px;
+      }
+      .device {
+        width: min(430px, 100%);
+        height: min(860px, calc(100vh - 36px));
+        background: linear-gradient(180deg, #0f0f16 0%, #08080c 100%);
+        border: 1px solid #2b2b37;
+        border-radius: 34px;
+        box-shadow:
+          0 24px 80px rgba(0, 0, 0, 0.55),
+          inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        position: relative;
+        overflow: hidden;
+      }
+      .top-safe {
+        height: 24px;
+      }
+      .status-pill {
+        margin: 0 auto;
+        width: 140px;
+        height: 24px;
+        border-radius: 999px;
+        background: #020204;
+      }
+      .app {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .content {
+        flex: 1;
+        overflow: auto;
+        padding: 18px 16px 110px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .title {
+        margin: 0;
+        font-size: 28px;
+        line-height: 1.1;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+      .subtitle {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+      .ghost-btn,
+      .btn {
+        border: 1px solid var(--border);
+        color: var(--text);
+        background: var(--surface-soft);
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn.primary {
+        background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%);
+        border-color: rgba(139, 92, 246, 0.65);
+      }
+      .btn.full {
+        width: 100%;
+        justify-content: center;
+      }
+      .card {
+        background: linear-gradient(
+          180deg,
+          rgba(26, 26, 34, 0.92) 0%,
+          rgba(21, 21, 29, 0.92) 100%
+        );
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 16px;
+        margin-bottom: 12px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .label {
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .stat {
+        font-size: 30px;
+        font-weight: 700;
+        margin-top: 4px;
+      }
+      .status-ok {
+        color: var(--ok);
+        font-weight: 700;
+      }
+      .status-warn {
+        color: var(--warn);
+        font-weight: 700;
+      }
+      .status-danger {
+        color: var(--danger);
+        font-weight: 700;
+      }
+      .switch {
+        width: 56px;
+        height: 32px;
+        background: #3f3f46;
+        border-radius: 999px;
+        padding: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .switch::after {
+        content: "";
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #fff;
+        display: block;
+        transition: transform 0.2s;
+      }
+      .switch.on {
+        background: var(--primary);
+      }
+      .switch.on::after {
+        transform: translateX(24px);
+      }
+      .action-tile {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px;
+        background: #191925;
+        margin-bottom: 8px;
+        cursor: pointer;
+      }
+      .action-tile h3 {
+        margin: 0 0 4px;
+        font-size: 15px;
+      }
+      .action-tile p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .app-item {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px;
+        background: #191925;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .pkg {
+        color: #6b7280;
+        font-size: 12px;
+        margin-top: 4px;
+      }
+      .screen {
+        display: none;
+      }
+      .screen.active {
+        display: block;
+      }
+      .bottom-nav-wrap {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 10px 14px 14px;
+        background: linear-gradient(180deg, rgba(11, 11, 16, 0) 0%, rgba(11, 11, 16, 0.97) 35%);
+      }
+      .bottom-nav {
+        background: rgba(20, 20, 28, 0.9);
+        border: 1px solid #2a2a39;
+        border-radius: 20px;
+        padding: 8px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        backdrop-filter: blur(12px);
+      }
+      .tab {
+        border: 1px solid transparent;
+        background: transparent;
+        color: #a1a1aa;
+        border-radius: 12px;
+        padding: 10px 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .tab.active {
+        color: #fff;
+        background: var(--primary-soft);
+        border-color: rgba(124, 58, 237, 0.5);
+      }
+      .tab .icon {
+        display: block;
+        width: 18px;
+        height: 18px;
+        margin: 0 auto 4px;
+      }
+      .tab .icon svg {
+        width: 100%;
+        height: 100%;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.9;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .tab .icon-fill svg {
+        fill: currentColor;
+        stroke: none;
+      }
+      .tab .tab-label {
+        display: block;
+        line-height: 1;
+        font-size: 12px;
+      }
+      .mode-toggle {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .mode-btn {
+        border: 1px solid var(--border);
+        background: #181824;
+        color: #d1d5db;
+        border-radius: 12px;
+        padding: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .mode-btn.active {
+        background: var(--primary-soft);
+        border-color: rgba(124, 58, 237, 0.55);
+        color: #ffffff;
+      }
+      .manual-editor {
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: #161622;
+      }
+      .editor-note {
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .field-label {
+        color: #cbd5e1;
+        font-size: 12px;
+        margin: 0 0 6px;
+        font-weight: 600;
+      }
+      .field-input {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: #10101a;
+        color: var(--text);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+      .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .manual-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .manual-message {
+        font-size: 12px;
+        margin: 8px 0 0;
+        min-height: 16px;
+      }
+      .manual-list-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 12px 0 8px;
+      }
+      .manual-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .manual-question-item {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: #12121c;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .manual-question-title {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .manual-question-meta {
+        margin: 4px 0 0;
+        color: #94a3b8;
+        font-size: 12px;
+      }
+      .hidden {
+        display: none;
+      }
+      .top-preview-actions {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 2, 4, 0.72);
+        display: none;
+        align-items: flex-end;
+        z-index: 200;
+      }
+      .modal.open {
+        display: flex;
+      }
+      .sheet {
+        width: min(430px, 100%);
+        margin: 0 auto;
+        border: 1px solid var(--border);
+        border-bottom: none;
+        border-radius: 24px 24px 0 0;
+        background: #0f0f16;
+        padding: 16px;
+        max-height: 82vh;
+        overflow: auto;
+      }
+      .search {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        margin: 12px 0;
+      }
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 12px;
+        color: #6b7280;
+        word-break: break-all;
+      }
+      /* Global lock overlay preview (system-wide style) */
+      .lock-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(7, 7, 10, 0.86);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        z-index: 400;
+      }
+      .lock-overlay.open {
+        display: flex;
+      }
+      .lock-card {
+        width: min(360px, 100%);
+        background: linear-gradient(180deg, #1a1a24 0%, #11111a 100%);
+        border: 1px solid rgba(124, 58, 237, 0.45);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+      }
+      .lock-title {
+        text-align: center;
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0 0 10px;
+      }
+      .lock-sub {
+        text-align: center;
+        color: var(--muted);
+        margin: 0 0 12px;
+        font-size: 13px;
+      }
+      .lock-question {
+        text-align: center;
+        font-size: 22px;
+        font-weight: 700;
+        margin: 8px 0 12px;
+      }
+      .lock-timer {
+        text-align: center;
+        color: #c4b5fd;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+      .opts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .opt {
+        border: 1px solid rgba(139, 92, 246, 0.5);
+        background: rgba(124, 58, 237, 0.95);
+        color: #fff;
+        border-radius: 14px;
+        padding: 12px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .opt:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .lock-hint {
+        text-align: center;
+        color: var(--warn);
+        min-height: 20px;
+        margin-top: 10px;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="device">
+      <div class="top-safe">
+        <div class="status-pill"></div>
+      </div>
+
+      <div class="app">
+        <div class="content">
+          <div class="top-preview-actions">
+            <button type="button" class="ghost-btn" id="openOnboarding">Onboarding</button>
+            <button type="button" class="btn primary" id="previewOverlayBtn">Preview Lock Overlay</button>
+          </div>
+
+          <!-- Home -->
+          <section id="home" class="screen active">
+            <div class="header">
+              <div>
+                <h1 class="title">FocusLock</h1>
+                <p class="subtitle">Smart app control for distraction management.</p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="row">
+                <div>
+                  <div class="label">Service</div>
+                  <p id="serviceStatus" class="muted" style="margin: 4px 0 0">Service Stopped</p>
+                </div>
+                <div id="serviceToggle" class="switch"></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <p class="muted" style="margin: 0 0 6px; font-size: 13px">Session status</p>
+              <p style="margin: 4px 0">
+                Permissions:
+                <span id="permSummary" class="status-ok">Ready</span>
+              </p>
+              <p style="margin: 4px 0">
+                Monitored apps:
+                <strong id="homeMonCount">4</strong>
+              </p>
+              <p style="margin: 4px 0">
+                Locks today:
+                <strong id="homeLockCount">0</strong>
+              </p>
+            </div>
+
+            <div class="card">
+              <div class="row">
+                <div class="label">Overlay Question Mode</div>
+                <span class="muted" id="modeSummary">Auto</span>
+              </div>
+              <p style="margin: 8px 0 0" class="muted">
+                Choose whether math questions are generated automatically or entered manually.
+              </p>
+              <div class="mode-toggle">
+                <button type="button" class="mode-btn" id="manualModeBtn">Manual</button>
+                <button type="button" class="mode-btn active" id="autoModeBtn">Auto</button>
+              </div>
+              <div class="manual-editor hidden" id="manualEditor">
+                <p class="field-label">Custom question</p>
+                <p class="editor-note">Add multiple manual questions. One will be picked randomly each lock cycle.</p>
+                <input id="manualQuestionText" class="field-input" type="text" placeholder="Example: 3 + 4 = ?" />
+                <div class="field-row">
+                  <div>
+                    <p class="field-label">Correct answer</p>
+                    <input id="manualAnswer" class="field-input" type="number" placeholder="7" />
+                  </div>
+                  <div>
+                    <p class="field-label">Option 2</p>
+                    <input id="manualOption2" class="field-input" type="number" placeholder="8" />
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div>
+                    <p class="field-label">Option 3</p>
+                    <input id="manualOption3" class="field-input" type="number" placeholder="6" />
+                  </div>
+                  <div>
+                    <p class="field-label">Option 4</p>
+                    <input id="manualOption4" class="field-input" type="number" placeholder="9" />
+                  </div>
+                </div>
+                <div class="manual-actions">
+                  <button type="button" class="btn primary full" id="addManualQuestionBtn">Add question</button>
+                </div>
+                <p id="manualMessage" class="manual-message muted"></p>
+                <div class="manual-list-head">
+                  <p class="field-label" style="margin: 0">Saved manual questions</p>
+                  <span id="manualQuestionCount" class="muted">0</span>
+                </div>
+                <div id="manualQuestionList" class="manual-list"></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 style="margin: 0 0 10px; font-size: 16px">Quick actions</h3>
+              <div class="action-tile" data-go="apps">
+                <h3>Manage monitored apps</h3>
+                <p>Add or remove apps such as YouTube, TikTok, and Chrome.</p>
+              </div>
+              <div class="action-tile" data-go="permissions">
+                <h3>Check permissions</h3>
+                <p>Open usage, overlay, battery, and notification settings quickly.</p>
+              </div>
+              <div class="action-tile" data-go="stats">
+                <h3>Diagnostics</h3>
+                <p>Verify service state, foreground app detection, and lock metrics.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Apps -->
+          <section id="apps" class="screen">
+            <div class="header">
+              <div>
+                <h1 class="title">Apps</h1>
+                <p class="subtitle">Select apps that should be controlled automatically.</p>
+              </div>
+            </div>
+
+            <div class="row" style="margin-bottom: 10px">
+              <h3 style="margin: 0; font-size: 16px">Monitored apps</h3>
+              <button class="btn small primary" id="openPicker">Add app</button>
+            </div>
+            <div id="appsList"></div>
+          </section>
+
+          <!-- Permissions -->
+          <section id="permissions" class="screen">
+            <div class="header">
+              <div>
+                <h1 class="title">Permissions</h1>
+                <p class="subtitle">Optimize behavior across Android devices.</p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="row">
+                <div class="label">Usage Access</div>
+                <div class="status-warn">Needs action</div>
+              </div>
+              <p>Required to detect which app is currently in the foreground.</p>
+              <button class="btn primary full">Open usage settings</button>
+            </div>
+
+            <div class="card">
+              <div class="row">
+                <div class="label">Display Over Other Apps</div>
+                <div class="status-ok">Enabled</div>
+              </div>
+              <p>Required to show the global lock overlay when app usage reaches limit.</p>
+              <button class="btn primary full">Open overlay settings</button>
+            </div>
+
+            <div class="card">
+              <div class="row">
+                <div class="label">Battery Optimization</div>
+                <div class="status-warn">Needs action</div>
+              </div>
+              <p>Disable optimization for stronger background monitoring reliability.</p>
+              <button class="btn primary full">Open battery settings</button>
+            </div>
+
+            <div class="card">
+              <div class="row">
+                <div class="label">Notifications</div>
+                <div class="status-ok">Enabled</div>
+              </div>
+              <p>Foreground service notification must remain visible while active.</p>
+              <button class="btn primary full">Open notification settings</button>
+            </div>
+          </section>
+
+          <!-- Stats -->
+          <section id="stats" class="screen">
+            <div class="header">
+              <div>
+                <h1 class="title">Stats</h1>
+                <p class="subtitle">Live diagnostics and lock cycle monitoring.</p>
+              </div>
+            </div>
+
+            <div class="card">
+              <p class="muted" style="margin: 0; font-size: 13px">Locks today</p>
+              <div class="stat" id="statsLocks">0</div>
+            </div>
+
+            <div class="card">
+              <div class="row">
+                <div>
+                  <p class="muted" style="margin: 0; font-size: 13px">Service status</p>
+                  <p id="statsService" class="status-warn" style="margin: 6px 0 0">Stopped</p>
+                </div>
+                <div>
+                  <p class="muted" style="margin: 0; font-size: 13px">Monitored</p>
+                  <p id="statsMonitored" style="margin: 6px 0 0; font-weight: 700">4 apps</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <p class="muted" style="margin: 0; font-size: 13px">Current foreground app</p>
+              <p style="margin: 6px 0 0; font-weight: 700">YouTube</p>
+              <p class="mono">com.google.android.youtube</p>
+            </div>
+          </section>
+
+          <!-- Onboarding -->
+          <section id="onboarding" class="screen">
+            <div class="header">
+              <div>
+                <h1 class="title">Onboarding</h1>
+                <p class="subtitle">Complete setup once to enable full control behavior.</p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="row">
+                <div class="label">1. Usage Access</div>
+                <span class="status-warn">Off</span>
+              </div>
+              <p>Settings -> Apps -> Special app access -> Usage access -> FocusLock.</p>
+              <button class="btn primary full">Open usage settings</button>
+            </div>
+
+            <div class="card">
+              <div class="row">
+                <div class="label">2. Display Over Other Apps</div>
+                <span class="status-ok">On</span>
+              </div>
+              <p>Required for full-screen lock overlay above every app.</p>
+              <button class="btn primary full">Open overlay settings</button>
+            </div>
+
+            <button class="btn full" style="margin-bottom: 8px">Refresh permission status</button>
+            <button class="btn primary full">Complete setup</button>
+          </section>
+        </div>
+
+        <div class="bottom-nav-wrap">
+          <nav class="bottom-nav">
+            <button class="tab active" data-screen="home">
+              <span class="icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 10.5L12 3l9 7.5"></path>
+                  <path d="M5.5 9.5V21h13V9.5"></path>
+                </svg>
+              </span>
+              <span class="tab-label">Home</span>
+            </button>
+            <button class="tab" data-screen="apps">
+              <span class="icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="7" y="2.8" width="10" height="18.4" rx="2.2"></rect>
+                  <path d="M10 5.8h4"></path>
+                  <circle cx="12" cy="18.2" r="0.8"></circle>
+                </svg>
+              </span>
+              <span class="tab-label">Apps</span>
+            </button>
+            <button class="tab" data-screen="permissions">
+              <span class="icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="2.8"></circle>
+                  <path
+                    d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.6 1.6 0 0 1-2.3 2.3l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9v.2a1.6 1.6 0 1 1-3.2 0V19a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1.6 1.6 0 0 1-2.3-2.3l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4.8a1.6 1.6 0 1 1 0-3.2H5a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a1.6 1.6 0 0 1 2.3-2.3l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4.8a1.6 1.6 0 1 1 3.2 0V5a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1.6 1.6 0 1 1 2.3 2.3l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a1.6 1.6 0 1 1 0 3.2H20a1 1 0 0 0-.6.2z"
+                  ></path>
+                </svg>
+              </span>
+              <span class="tab-label">Permissions</span>
+            </button>
+            <button class="tab" data-screen="stats">
+              <span class="icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 20h16"></path>
+                  <rect x="6" y="11" width="3" height="7" rx="0.8"></rect>
+                  <rect x="10.5" y="8" width="3" height="10" rx="0.8"></rect>
+                  <rect x="15" y="5" width="3" height="13" rx="0.8"></rect>
+                </svg>
+              </span>
+              <span class="tab-label">Stats</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <!-- App picker -->
+    <div id="pickerModal" class="modal">
+      <div class="sheet">
+        <div class="row">
+          <h3 style="margin: 0; font-size: 18px">Add monitored app</h3>
+          <button class="ghost-btn" id="closePicker">Close</button>
+        </div>
+        <input id="pickerSearch" class="search" type="search" placeholder="Search by app name or package..." />
+        <div id="pickerList"></div>
+      </div>
+    </div>
+
+    <!-- Global lock overlay preview -->
+    <div id="lockOverlay" class="lock-overlay">
+      <div class="lock-card">
+        <p class="lock-title">Focus Lock Active</p>
+        <p class="lock-sub">This lock applies system-wide for 15 seconds.</p>
+        <p id="lockQuestion" class="lock-question">1 + 3 = ?</p>
+        <p id="lockTimer" class="lock-timer">15 s</p>
+        <div id="lockOptions" class="opts"></div>
+        <p id="lockHint" class="lock-hint"></p>
+      </div>
+    </div>
+
+    <script>
+      const screens = document.querySelectorAll(".screen");
+      const tabs = document.querySelectorAll(".tab");
+      const quickTiles = document.querySelectorAll("[data-go]");
+      const openOnboardingBtn = document.getElementById("openOnboarding");
+      const previewOverlayBtn = document.getElementById("previewOverlayBtn");
+
+      const serviceToggle = document.getElementById("serviceToggle");
+      const serviceStatus = document.getElementById("serviceStatus");
+      const permSummary = document.getElementById("permSummary");
+      const homeMonCount = document.getElementById("homeMonCount");
+      const homeLockCount = document.getElementById("homeLockCount");
+      const statsLocks = document.getElementById("statsLocks");
+      const statsService = document.getElementById("statsService");
+      const statsMonitored = document.getElementById("statsMonitored");
+      const modeSummary = document.getElementById("modeSummary");
+      const manualModeBtn = document.getElementById("manualModeBtn");
+      const autoModeBtn = document.getElementById("autoModeBtn");
+      const manualEditor = document.getElementById("manualEditor");
+      const manualQuestionText = document.getElementById("manualQuestionText");
+      const manualAnswer = document.getElementById("manualAnswer");
+      const manualOption2 = document.getElementById("manualOption2");
+      const manualOption3 = document.getElementById("manualOption3");
+      const manualOption4 = document.getElementById("manualOption4");
+      const addManualQuestionBtn = document.getElementById("addManualQuestionBtn");
+      const manualQuestionList = document.getElementById("manualQuestionList");
+      const manualQuestionCount = document.getElementById("manualQuestionCount");
+      const manualMessage = document.getElementById("manualMessage");
+
+      const appsList = document.getElementById("appsList");
+      const pickerModal = document.getElementById("pickerModal");
+      const pickerList = document.getElementById("pickerList");
+      const pickerSearch = document.getElementById("pickerSearch");
+      const openPickerBtn = document.getElementById("openPicker");
+      const closePickerBtn = document.getElementById("closePicker");
+
+      const lockOverlay = document.getElementById("lockOverlay");
+      const lockQuestion = document.getElementById("lockQuestion");
+      const lockTimer = document.getElementById("lockTimer");
+      const lockOptions = document.getElementById("lockOptions");
+      const lockHint = document.getElementById("lockHint");
+
+      let serviceOn = false;
+      let locksToday = 0;
+      let questionMode = "auto";
+      let manualQuestions = [
+        { text: "3 + 4 = ?", answer: 7, options: [7, 8, 6, 9] },
+        { text: "5 + 2 = ?", answer: 7, options: [7, 5, 8, 9] },
+      ];
+      let monitoredApps = [
+        ["YouTube", "com.google.android.youtube"],
+        ["TikTok", "com.zhiliaoapp.musically"],
+        ["Instagram", "com.instagram.android"],
+        ["Chrome", "com.android.chrome"],
+      ];
+
+      const allApps = [
+        ["YouTube", "com.google.android.youtube"],
+        ["TikTok", "com.zhiliaoapp.musically"],
+        ["Instagram", "com.instagram.android"],
+        ["Facebook", "com.facebook.katana"],
+        ["Chrome", "com.android.chrome"],
+        ["X", "com.twitter.android"],
+        ["Netflix", "com.netflix.mediaclient"],
+        ["Reddit", "com.reddit.frontpage"],
+      ];
+
+      function setActiveScreen(id) {
+        screens.forEach((s) => s.classList.toggle("active", s.id === id));
+        tabs.forEach((t) => t.classList.toggle("active", t.dataset.screen === id));
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => setActiveScreen(tab.dataset.screen));
+      });
+
+      quickTiles.forEach((tile) => {
+        tile.addEventListener("click", () => setActiveScreen(tile.dataset.go));
+      });
+
+      openOnboardingBtn.addEventListener("click", () => {
+        setActiveScreen("onboarding");
+      });
+
+      serviceToggle.addEventListener("click", () => {
+        serviceOn = !serviceOn;
+        syncServiceUI();
+      });
+
+      function syncQuestionModeUI() {
+        const manual = questionMode === "manual";
+        manualModeBtn.classList.toggle("active", manual);
+        autoModeBtn.classList.toggle("active", !manual);
+        manualEditor.classList.toggle("hidden", !manual);
+        modeSummary.textContent = manual ? `Manual (${manualQuestions.length})` : "Auto";
+      }
+
+      manualModeBtn.addEventListener("click", () => {
+        questionMode = "manual";
+        syncQuestionModeUI();
+      });
+
+      autoModeBtn.addEventListener("click", () => {
+        questionMode = "auto";
+        syncQuestionModeUI();
+      });
+
+      function shuffleOptions(items) {
+        return [...items].sort(() => Math.random() - 0.5);
+      }
+
+      function renderManualQuestions() {
+        manualQuestionList.innerHTML = "";
+        manualQuestionCount.textContent = `${manualQuestions.length}`;
+        manualQuestions.forEach((q, idx) => {
+          const row = document.createElement("div");
+          row.className = "manual-question-item";
+          row.innerHTML = `
+            <div>
+              <p class="manual-question-title">${q.text}</p>
+              <p class="manual-question-meta">Answer: ${q.answer} | Options: ${q.options.join(", ")}</p>
+            </div>
+            <button type="button" class="ghost-btn" data-manual-remove="${idx}">Remove</button>
+          `;
+          manualQuestionList.appendChild(row);
+        });
+
+        manualQuestionList.querySelectorAll("[data-manual-remove]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const idx = Number(btn.dataset.manualRemove);
+            manualQuestions.splice(idx, 1);
+            renderManualQuestions();
+            syncQuestionModeUI();
+          });
+        });
+      }
+
+      function addManualQuestion() {
+        const text = manualQuestionText.value.trim();
+        const answer = Number(manualAnswer.value);
+        const opt2 = Number(manualOption2.value);
+        const opt3 = Number(manualOption3.value);
+        const opt4 = Number(manualOption4.value);
+
+        if (!text) {
+          manualMessage.textContent = "Please enter the question text.";
+          manualMessage.className = "manual-message status-danger";
+          return;
+        }
+        if ([answer, opt2, opt3, opt4].some((n) => Number.isNaN(n))) {
+          manualMessage.textContent = "Please provide 4 numeric options including the correct answer.";
+          manualMessage.className = "manual-message status-danger";
+          return;
+        }
+
+        const optionSet = new Set([answer, opt2, opt3, opt4]);
+        if (optionSet.size < 4) {
+          manualMessage.textContent = "Options must be unique values.";
+          manualMessage.className = "manual-message status-danger";
+          return;
+        }
+
+        manualQuestions.push({
+          text,
+          answer,
+          options: Array.from(optionSet),
+        });
+
+        manualQuestionText.value = "";
+        manualAnswer.value = "";
+        manualOption2.value = "";
+        manualOption3.value = "";
+        manualOption4.value = "";
+        manualMessage.textContent = "Manual question added successfully.";
+        manualMessage.className = "manual-message status-ok";
+        renderManualQuestions();
+        syncQuestionModeUI();
+      }
+
+      addManualQuestionBtn.addEventListener("click", addManualQuestion);
+
+      function syncServiceUI() {
+        serviceToggle.classList.toggle("on", serviceOn);
+        serviceStatus.textContent = serviceOn ? "Service Running" : "Service Stopped";
+        serviceStatus.className = serviceOn ? "status-ok" : "muted";
+        statsService.textContent = serviceOn ? "Running" : "Stopped";
+        statsService.className = serviceOn ? "status-ok" : "status-warn";
+        permSummary.textContent = "Ready";
+        permSummary.className = "status-ok";
+      }
+
+      function updateCounters() {
+        homeMonCount.textContent = String(monitoredApps.length);
+        statsMonitored.textContent = `${monitoredApps.length} apps`;
+        homeLockCount.textContent = String(locksToday);
+        statsLocks.textContent = String(locksToday);
+      }
+
+      function renderMonitoredApps() {
+        appsList.innerHTML = "";
+        monitoredApps.forEach(([name, pkg], idx) => {
+          const row = document.createElement("div");
+          row.className = "app-item";
+          row.innerHTML = `
+            <div>
+              <div class="label">${name}</div>
+              <div class="pkg">${pkg}</div>
+            </div>
+            <button class="ghost-btn" data-remove="${idx}">Remove</button>
+          `;
+          appsList.appendChild(row);
+        });
+
+        appsList.querySelectorAll("[data-remove]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const idx = Number(btn.dataset.remove);
+            monitoredApps.splice(idx, 1);
+            renderMonitoredApps();
+            renderPicker();
+            updateCounters();
+          });
+        });
+      }
+
+      function renderPicker() {
+        const query = (pickerSearch.value || "").trim().toLowerCase();
+        pickerList.innerHTML = "";
+        allApps.forEach(([name, pkg]) => {
+          if (query && !name.toLowerCase().includes(query) && !pkg.toLowerCase().includes(query)) {
+            return;
+          }
+
+          const already = monitoredApps.some((a) => a[1] === pkg);
+          const row = document.createElement("div");
+          row.className = "app-item";
+          row.innerHTML = `
+            <div>
+              <div class="label">${name}</div>
+              <div class="pkg">${pkg}</div>
+            </div>
+            <button class="ghost-btn" ${already ? "disabled" : ""}>
+              ${already ? "Added" : "Add"}
+            </button>
+          `;
+          const addBtn = row.querySelector("button");
+          if (!already) {
+            addBtn.addEventListener("click", () => {
+              monitoredApps.push([name, pkg]);
+              renderMonitoredApps();
+              renderPicker();
+              updateCounters();
+            });
+          }
+          pickerList.appendChild(row);
+        });
+      }
+
+      openPickerBtn.addEventListener("click", () => {
+        pickerModal.classList.add("open");
+        renderPicker();
+      });
+      closePickerBtn.addEventListener("click", () => pickerModal.classList.remove("open"));
+      pickerModal.addEventListener("click", (e) => {
+        if (e.target === pickerModal) pickerModal.classList.remove("open");
+      });
+      pickerSearch.addEventListener("input", renderPicker);
+
+      function randomQuestion() {
+        const a = Math.floor(Math.random() * 7) + 1;
+        const b = Math.floor(Math.random() * 7) + 1;
+        const answer = a + b;
+        const options = new Set([answer]);
+        while (options.size < 4) {
+          const wrong = answer + Math.floor(Math.random() * 7) - 3;
+          if (wrong >= 0 && wrong !== answer) options.add(wrong);
+        }
+        return {
+          text: `${a} + ${b} = ?`,
+          answer,
+          options: Array.from(options).sort(() => Math.random() - 0.5),
+        };
+      }
+
+      function getOverlayQuestion() {
+        if (questionMode === "manual" && manualQuestions.length > 0) {
+          const idx = Math.floor(Math.random() * manualQuestions.length);
+          const selected = manualQuestions[idx];
+          return {
+            text: selected.text,
+            answer: selected.answer,
+            options: shuffleOptions(selected.options),
+          };
+        }
+        return randomQuestion();
+      }
+
+      let lockTimerId = null;
+      let lockSeconds = 15;
+      let lockAnswer = 0;
+      let wrongLocked = false;
+
+      function stopOverlayTimer() {
+        if (lockTimerId) {
+          clearInterval(lockTimerId);
+          lockTimerId = null;
+        }
+      }
+
+      function closeOverlay(correctSolved) {
+        stopOverlayTimer();
+        lockOverlay.classList.remove("open");
+        if (correctSolved) {
+          locksToday += 1;
+          updateCounters();
+        }
+        lockHint.textContent = "";
+        wrongLocked = false;
+      }
+
+      function showOverlayDemo() {
+        const q = getOverlayQuestion();
+        lockAnswer = q.answer;
+        wrongLocked = false;
+        lockHint.textContent = "";
+        lockQuestion.textContent = q.text;
+        lockOptions.innerHTML = "";
+
+        q.options.forEach((n) => {
+          const b = document.createElement("button");
+          b.className = "opt";
+          b.textContent = String(n);
+          b.addEventListener("click", () => {
+            if (wrongLocked) return;
+            if (n === lockAnswer) {
+              closeOverlay(true);
+            } else {
+              wrongLocked = true;
+              lockHint.textContent = "Wrong answer. Wait until timer ends.";
+              lockOptions.querySelectorAll(".opt").forEach((btn) => (btn.disabled = true));
+            }
+          });
+          lockOptions.appendChild(b);
+        });
+
+        lockSeconds = 15;
+        lockTimer.textContent = `${lockSeconds} s`;
+        lockOverlay.classList.add("open");
+        stopOverlayTimer();
+        lockTimerId = setInterval(() => {
+          if (!lockOverlay.classList.contains("open")) {
+            stopOverlayTimer();
+            return;
+          }
+          lockSeconds -= 1;
+          lockTimer.textContent = `${Math.max(0, lockSeconds)} s`;
+          if (lockSeconds <= 0) {
+            closeOverlay(false);
+          }
+        }, 1000);
+      }
+
+      previewOverlayBtn.addEventListener("click", showOverlayDemo);
+
+      lockOverlay.addEventListener("click", (e) => {
+        if (e.target === lockOverlay) {
+          e.preventDefault();
+        }
+      });
+
+      setActiveScreen("home");
+      renderMonitoredApps();
+      renderPicker();
+      renderManualQuestions();
+      updateCounters();
+      syncServiceUI();
+      syncQuestionModeUI();
+    </script>
+  </body>
+</html>

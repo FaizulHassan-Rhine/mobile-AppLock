@@ -1,0 +1,90 @@
+Build a React Native Android app called "FocusLock" with the following features:
+
+## Tech Stack
+- React Native (latest) with TypeScript
+- NativeWind (TailwindCSS for React Native)
+- React Navigation
+- Kotlin native modules for Android system-level access
+
+## Core Features
+
+### 1. App Monitoring Service
+- Run a persistent Android Foreground Service in Kotlin
+- Use UsageStatsManager to detect which app is currently in the foreground (poll every 2 seconds)
+- Target apps to monitor: YouTube (com.google.android.youtube), TikTok (com.zhiliaoapp.musically), Facebook (com.facebook.katana), Instagram (com.instagram.android)
+- Allow users to add/remove apps from the monitored list
+
+### 2. Lock Behavior
+- After 1 minute of continuous usage of any monitored app, trigger the lock screen
+- Lock duration: 15 seconds
+- Show a fullscreen overlay using SYSTEM_ALERT_WINDOW permission over the target app
+- The overlay must appear ON TOP of YouTube/TikTok etc (not replace it)
+
+### 3. Lock Screen Overlay
+- Built in React Native rendered as an overlay window
+- Show a random math question (e.g., "12 + 7 = ?", "15 - 6 = ?", "4 × 3 = ?")
+- 4 multiple choice options (one correct, three wrong)
+- If correct answer tapped: dismiss overlay, start 1 minute timer again
+- If wrong answer tapped: show "ভুল হয়েছে! আবার চেষ্টা করো" and generate new question, keep locked
+- Countdown timer visible on lock screen showing 15 seconds remaining
+
+### 4. Permissions Required
+- android.permission.PACKAGE_USAGE_STATS (Usage access)
+- android.permission.SYSTEM_ALERT_WINDOW (Display over other apps)
+- android.permission.FOREGROUND_SERVICE
+- android.permission.FOREGROUND_SERVICE_SPECIAL_USE
+
+### 5. Onboarding / Setup Screen
+- On first launch, guide user to enable:
+  1. "Usage Access" permission (Settings > Apps > Special App Access > Usage Access)
+  2. "Display Over Other Apps" permission
+- Show clear step-by-step instructions with buttons that deep-link directly to the correct settings page
+
+### 6. Home Screen (Main UI)
+- Toggle switch to enable/disable FocusLock service
+- List of monitored apps with toggle for each
+- Add app button (shows installed apps list)
+- Status indicator: "Service Running" / "Service Stopped"
+- Session stats: how many times locked today
+
+## Project Structure
+src/
+  screens/
+    HomeScreen.tsx
+    OnboardingScreen.tsx
+  components/
+    LockOverlay.tsx
+    AppListItem.tsx
+    MathQuestion.tsx
+  services/
+    LockService.ts (JS bridge)
+  navigation/
+    AppNavigator.tsx
+
+android/app/src/main/java/com/focuslock/
+  AppMonitorService.kt      (Foreground service)
+  OverlayManager.kt         (SYSTEM_ALERT_WINDOW overlay)
+  UsageStatsHelper.kt       (foreground app detection)
+  NativeServiceModule.kt    (React Native bridge)
+  NativeServicePackage.kt
+
+## Styling
+- Use NativeWind (TailwindCSS) for all React Native components
+- Clean modern UI, dark theme
+- Primary color: purple (#7C3AED)
+- Background: #0F0F0F
+- Card background: #1A1A1A
+
+## Important Notes
+- The overlay must work WHILE YouTube/TikTok is in foreground (user is actively watching)
+- Foreground service must show a persistent notification to stay alive on Android
+- Handle edge case: if user switches app before 1 min, reset the timer
+- Test on Android API 26+
+- The app must survive being killed by the system (use START_STICKY for service)
+
+Generate all files with complete working code. Start with:
+1. package.json with all dependencies
+2. Android native modules (Kotlin files)
+3. React Native bridge
+4. All screens and components
+5. AndroidManifest.xml with correct permissions
