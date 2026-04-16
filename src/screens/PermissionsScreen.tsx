@@ -1,8 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useFocusEffect } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenBackdrop from '../components/ScreenBackdrop';
 import { LockService } from '../services/LockService';
-import QuickNav from '../components/QuickNav';
 
 type PermissionState = {
   usage: boolean;
@@ -12,13 +14,15 @@ type PermissionState = {
 
 function StatusBadge({ on }: { on: boolean }) {
   return (
-    <Text className={on ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-semibold'}>
+    <Text
+      className={`text-[13px] font-bold ${on ? 'text-focus-ok' : 'text-focus-warn'}`}>
       {on ? 'Enabled' : 'Needs action'}
     </Text>
   );
 }
 
 export default function PermissionsScreen() {
+  const tabBarHeight = useBottomTabBarHeight();
   const [state, setState] = useState<PermissionState>({
     usage: false,
     overlay: false,
@@ -41,85 +45,91 @@ export default function PermissionsScreen() {
   );
 
   return (
-    <ScrollView className="flex-1 bg-focus-bg">
-      <View className="px-5 pt-12 pb-10">
-        <Text className="text-3xl font-bold text-white mb-1">Permissions</Text>
-        <Text className="text-zinc-500 mb-2">
-          Optimize FocusLock for all Android devices.
-        </Text>
-        <QuickNav active="Permissions" />
+    <ScreenBackdrop>
+      <SafeAreaView className="flex-1" edges={['top']}>
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ paddingBottom: tabBarHeight + 20 }}
+          showsVerticalScrollIndicator={false}>
+          <View className="px-4 pb-4 pt-2">
+            <Text className="text-[28px] font-bold text-white" style={{ letterSpacing: 0.2 }}>
+              Permissions
+            </Text>
+            <Text className="mt-1.5 text-[14px] leading-[1.45] text-focus-muted">
+              Tune FocusLock so it survives real devices and OEM battery rules.
+            </Text>
 
-        <View className="bg-focus-card rounded-2xl p-5 mt-4 mb-3 border border-zinc-800">
-          <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-white text-lg font-semibold">Usage Access</Text>
-            <StatusBadge on={state.usage} />
+            <View className="mt-5 rounded-[18px] border border-focus-border bg-focus-surface/95 p-4">
+              <View className="mb-2 flex-row items-center justify-between">
+                <Text className="text-[16px] font-semibold text-white">Usage access</Text>
+                <StatusBadge on={state.usage} />
+              </View>
+              <Text className="mb-3 text-[14px] leading-snug text-focus-muted">
+                Required to detect which app is in the foreground.
+              </Text>
+              <Pressable
+                onPress={LockService.openUsageAccessSettings}
+                className="rounded-xl bg-violet-600 py-3.5 active:opacity-90"
+                style={{ borderWidth: 1, borderColor: 'rgba(139, 92, 246, 0.55)' }}>
+                <Text className="text-center text-[15px] font-bold text-white">Open usage settings</Text>
+              </Pressable>
+            </View>
+
+            <View className="mt-3 rounded-[18px] border border-focus-border bg-focus-surface/95 p-4">
+              <View className="mb-2 flex-row items-center justify-between">
+                <Text className="text-[16px] font-semibold text-white">Display over other apps</Text>
+                <StatusBadge on={state.overlay} />
+              </View>
+              <Text className="mb-3 text-[14px] leading-snug text-focus-muted">
+                Shows the math challenge above YouTube, browsers, and social apps.
+              </Text>
+              <Pressable
+                onPress={LockService.openOverlaySettings}
+                className="rounded-xl bg-violet-600 py-3.5 active:opacity-90"
+                style={{ borderWidth: 1, borderColor: 'rgba(139, 92, 246, 0.55)' }}>
+                <Text className="text-center text-[15px] font-bold text-white">Open overlay settings</Text>
+              </Pressable>
+            </View>
+
+            <View className="mt-3 rounded-[18px] border border-focus-border bg-focus-surface/95 p-4">
+              <View className="mb-2 flex-row items-center justify-between">
+                <Text className="text-[16px] font-semibold text-white">Battery optimization</Text>
+                <StatusBadge on={state.battery} />
+              </View>
+              <Text className="mb-3 text-[14px] leading-snug text-focus-muted">
+                Unrestricted battery helps the foreground service after “clean all” style tools.
+              </Text>
+              <Pressable
+                onPress={LockService.openBatteryOptimizationSettings}
+                className="rounded-xl bg-violet-600 py-3.5 active:opacity-90"
+                style={{ borderWidth: 1, borderColor: 'rgba(139, 92, 246, 0.55)' }}>
+                <Text className="text-center text-[15px] font-bold text-white">Open battery settings</Text>
+              </Pressable>
+            </View>
+
+            <View className="mt-3 rounded-[18px] border border-focus-border bg-focus-surface/95 p-4">
+              <Text className="mb-2 text-[16px] font-semibold text-white">Notifications</Text>
+              <Text className="mb-3 text-[14px] leading-snug text-focus-muted">
+                Keep the monitoring channel on so Android treats the service as a real background task.
+              </Text>
+              <Pressable
+                onPress={LockService.openNotificationSettings}
+                className="rounded-xl bg-violet-600 py-3.5 active:opacity-90"
+                style={{ borderWidth: 1, borderColor: 'rgba(139, 92, 246, 0.55)' }}>
+                <Text className="text-center text-[15px] font-bold text-white">Open notification settings</Text>
+              </Pressable>
+            </View>
+
+            <Pressable
+              onPress={refresh}
+              className="mt-3 rounded-xl border border-focus-border py-3.5 active:opacity-90">
+              <Text className="text-center text-[14px] font-semibold text-focus-muted">
+                Refresh permission status
+              </Text>
+            </Pressable>
           </View>
-          <Text className="text-zinc-400 mb-3">
-            Required to detect the current foreground app.
-          </Text>
-          <Pressable
-            onPress={LockService.openUsageAccessSettings}
-            className="bg-focus-primary py-3 rounded-xl">
-            <Text className="text-center text-white font-semibold">
-              Open usage settings
-            </Text>
-          </Pressable>
-        </View>
-
-        <View className="bg-focus-card rounded-2xl p-5 mb-3 border border-zinc-800">
-          <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-white text-lg font-semibold">Overlay Permission</Text>
-            <StatusBadge on={state.overlay} />
-          </View>
-          <Text className="text-zinc-400 mb-3">
-            Required to show the math challenge above YouTube/browser apps.
-          </Text>
-          <Pressable
-            onPress={LockService.openOverlaySettings}
-            className="bg-focus-primary py-3 rounded-xl">
-            <Text className="text-center text-white font-semibold">
-              Open overlay settings
-            </Text>
-          </Pressable>
-        </View>
-
-        <View className="bg-focus-card rounded-2xl p-5 mb-3 border border-zinc-800">
-          <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-white text-lg font-semibold">Battery Optimization</Text>
-            <StatusBadge on={state.battery} />
-          </View>
-          <Text className="text-zinc-400 mb-3">
-            Disable optimization so background monitoring survives aggressive OEM battery rules.
-          </Text>
-          <Pressable
-            onPress={LockService.openBatteryOptimizationSettings}
-            className="bg-focus-primary py-3 rounded-xl">
-            <Text className="text-center text-white font-semibold">
-              Open battery settings
-            </Text>
-          </Pressable>
-        </View>
-
-        <View className="bg-focus-card rounded-2xl p-5 mb-3 border border-zinc-800">
-          <Text className="text-white text-lg font-semibold mb-2">Notifications</Text>
-          <Text className="text-zinc-400 mb-3">
-            Foreground service needs a visible notification channel.
-          </Text>
-          <Pressable
-            onPress={LockService.openNotificationSettings}
-            className="bg-focus-primary py-3 rounded-xl">
-            <Text className="text-center text-white font-semibold">
-              Open notification settings
-            </Text>
-          </Pressable>
-        </View>
-
-        <Pressable
-          onPress={refresh}
-          className="py-3 mt-2 border border-zinc-700 rounded-xl">
-          <Text className="text-center text-zinc-300">Refresh permission status</Text>
-        </Pressable>
-      </View>
-    </ScrollView>
+        </ScrollView>
+      </SafeAreaView>
+    </ScreenBackdrop>
   );
 }

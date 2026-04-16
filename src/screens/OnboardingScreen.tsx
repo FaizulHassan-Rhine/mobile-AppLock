@@ -1,13 +1,12 @@
 import React, { useCallback, useState } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { CommonActions, useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenBackdrop from '../components/ScreenBackdrop';
 import { LockService } from '../services/LockService';
+import type { RootStackParamList } from '../navigation/types';
 
 const STORAGE_KEY = '@focuslock/onboarding_done';
 
@@ -21,7 +20,7 @@ export async function markOnboardingDone(): Promise<void> {
 }
 
 export default function OnboardingScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [usageOk, setUsageOk] = useState(false);
   const [overlayOk, setOverlayOk] = useState(false);
 
@@ -44,83 +43,73 @@ export default function OnboardingScreen() {
 
   const finish = async () => {
     await markOnboardingDone();
-    navigation.dispatch(
-      CommonActions.reset({ index: 0, routes: [{ name: 'Home' }] }),
-    );
+    navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Main' }] }));
   };
 
   return (
-    <ScrollView className="flex-1 bg-focus-bg">
-      <View className="px-5 pt-14 pb-10">
-        <Text className="text-3xl font-bold text-white mb-2">সেটআপ</Text>
-        <Text className="text-zinc-400 mb-8">
-          FocusLock কাজ করতে দুটি অনুমতি দরকার। নিচের ধাপগুলো অনুসরণ করো।
-        </Text>
+    <ScreenBackdrop>
+      <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
+        <ScrollView className="flex-1" contentContainerClassName="px-4 pb-10 pt-3">
+          <Text className="text-[28px] font-bold text-white" style={{ letterSpacing: 0.2 }}>
+            Welcome
+          </Text>
+          <Text className="mt-2 text-[14px] leading-[1.5] text-focus-muted">
+            FocusLock needs two Android permissions before it can run. Open each settings screen, enable access,
+            then return here.
+          </Text>
 
-        <View className="bg-focus-card rounded-2xl p-5 mb-4 border border-zinc-800">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-white text-lg font-semibold flex-1">
-              ১. Usage access
+          <View className="mt-8 rounded-[18px] border border-focus-border bg-focus-surface/95 p-4">
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="flex-1 text-[16px] font-semibold text-white">1. Usage access</Text>
+              <Text
+                className={`text-[13px] font-bold ${usageOk ? 'text-focus-ok' : 'text-focus-warn'}`}>
+                {usageOk ? 'On' : 'Off'}
+              </Text>
+            </View>
+            <Text className="mb-4 text-[14px] leading-snug text-focus-muted">
+              Settings → Apps → Special app access → Usage access → enable FocusLock.
             </Text>
-            {usageOk ? (
-              <Text className="text-emerald-400 text-sm font-medium">চালু</Text>
-            ) : (
-              <Text className="text-amber-400 text-sm font-medium">বন্ধ</Text>
-            )}
+            <Pressable
+              onPress={() => LockService.openUsageAccessSettings()}
+              className="rounded-xl bg-violet-600 py-3.5 active:opacity-90"
+              style={{ borderWidth: 1, borderColor: 'rgba(139, 92, 246, 0.55)' }}>
+              <Text className="text-center text-[15px] font-bold text-white">Open usage settings</Text>
+            </Pressable>
           </View>
-          <Text className="text-zinc-400 text-sm mb-4 leading-5">
-            সেটিংস → অ্যাপ → বিশেষ অ্যাপ অ্যাক্সেস → Usage access → FocusLock
-            চালু করো।
-          </Text>
-          <Pressable
-            onPress={() => LockService.openUsageAccessSettings()}
-            className="bg-focus-primary py-3 rounded-xl active:opacity-90">
-            <Text className="text-center text-white font-semibold">
-              Usage সেটিংস খুলুন
-            </Text>
-          </Pressable>
-        </View>
 
-        <View className="bg-focus-card rounded-2xl p-5 mb-8 border border-zinc-800">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-white text-lg font-semibold flex-1">
-              ২. Display over other apps
+          <View className="mt-3 rounded-[18px] border border-focus-border bg-focus-surface/95 p-4">
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="flex-1 text-[16px] font-semibold text-white">2. Display over other apps</Text>
+              <Text
+                className={`text-[13px] font-bold ${overlayOk ? 'text-focus-ok' : 'text-focus-warn'}`}>
+                {overlayOk ? 'On' : 'Off'}
+              </Text>
+            </View>
+            <Text className="mb-4 text-[14px] leading-snug text-focus-muted">
+              Allow FocusLock to draw the lock challenge above other apps.
             </Text>
-            {overlayOk ? (
-              <Text className="text-emerald-400 text-sm font-medium">চালু</Text>
-            ) : (
-              <Text className="text-amber-400 text-sm font-medium">বন্ধ</Text>
-            )}
+            <Pressable
+              onPress={() => LockService.openOverlaySettings()}
+              className="rounded-xl bg-violet-600 py-3.5 active:opacity-90"
+              style={{ borderWidth: 1, borderColor: 'rgba(139, 92, 246, 0.55)' }}>
+              <Text className="text-center text-[15px] font-bold text-white">Open overlay settings</Text>
+            </Pressable>
           </View>
-          <Text className="text-zinc-400 text-sm mb-4 leading-5">
-            অন্য অ্যাপের ওপর প্রদর্শন অনুমতি দাও যাতে লক স্ক্রিন দেখানো যায়।
-          </Text>
+
           <Pressable
-            onPress={() => LockService.openOverlaySettings()}
-            className="bg-focus-primary py-3 rounded-xl active:opacity-90">
-            <Text className="text-center text-white font-semibold">
-              Overlay সেটিংস খুলুন
-            </Text>
+            onPress={refresh}
+            className="mt-4 rounded-xl border border-focus-border py-3.5 active:opacity-90">
+            <Text className="text-center text-[14px] font-semibold text-focus-muted">Refresh status</Text>
           </Pressable>
-        </View>
 
-        <Pressable
-          onPress={refresh}
-          className="py-3 mb-4 border border-zinc-700 rounded-xl">
-          <Text className="text-center text-zinc-300">অনুমতি আবার চেক করুন</Text>
-        </Pressable>
-
-        <Pressable
-          disabled={!usageOk || !overlayOk}
-          onPress={finish}
-          className={`py-4 rounded-xl ${
-            usageOk && overlayOk ? 'bg-emerald-600' : 'bg-zinc-800'
-          }`}>
-          <Text className="text-center text-white font-bold text-lg">
-            শুরু করুন
-          </Text>
-        </Pressable>
-      </View>
-    </ScrollView>
+          <Pressable
+            disabled={!usageOk || !overlayOk}
+            onPress={finish}
+            className={`mt-4 rounded-xl py-4 ${usageOk && overlayOk ? 'bg-emerald-600' : 'bg-zinc-800'}`}>
+            <Text className="text-center text-[17px] font-bold text-white">Complete setup</Text>
+          </Pressable>
+        </ScrollView>
+      </SafeAreaView>
+    </ScreenBackdrop>
   );
 }

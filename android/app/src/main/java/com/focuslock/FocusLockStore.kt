@@ -11,6 +11,15 @@ object FocusLockStore {
   const val KEY_SERVICE_ENABLED = "service_enabled"
   const val KEY_LOCK_COUNT = "lock_count"
   const val KEY_LOCK_DAY = "lock_day"
+  const val KEY_USAGE_THRESHOLD_SECONDS = "usage_threshold_seconds"
+  const val KEY_BREAK_DURATION_SECONDS = "break_duration_seconds"
+
+  private const val DEFAULT_USAGE_THRESHOLD_SECONDS = 60
+  private const val DEFAULT_BREAK_DURATION_SECONDS = 15
+  private const val MIN_USAGE_THRESHOLD_SECONDS = 15
+  private const val MAX_USAGE_THRESHOLD_SECONDS = 3600
+  private const val MIN_BREAK_DURATION_SECONDS = 5
+  private const val MAX_BREAK_DURATION_SECONDS = 300
 
   val DEFAULT_MONITORED: List<String> =
       listOf(
@@ -69,5 +78,25 @@ object FocusLockStore {
         "${cal.get(java.util.Calendar.YEAR)}${cal.get(java.util.Calendar.DAY_OF_YEAR)}"
     if (sp.getString(KEY_LOCK_DAY, null) != day) return 0
     return sp.getInt(KEY_LOCK_COUNT, 0)
+  }
+
+  fun getUsageThresholdSeconds(context: Context): Int {
+    val raw = prefs(context).getInt(KEY_USAGE_THRESHOLD_SECONDS, DEFAULT_USAGE_THRESHOLD_SECONDS)
+    return raw.coerceIn(MIN_USAGE_THRESHOLD_SECONDS, MAX_USAGE_THRESHOLD_SECONDS)
+  }
+
+  fun setUsageThresholdSeconds(context: Context, seconds: Int) {
+    val normalized = seconds.coerceIn(MIN_USAGE_THRESHOLD_SECONDS, MAX_USAGE_THRESHOLD_SECONDS)
+    prefs(context).edit().putInt(KEY_USAGE_THRESHOLD_SECONDS, normalized).apply()
+  }
+
+  fun getBreakDurationSeconds(context: Context): Int {
+    val raw = prefs(context).getInt(KEY_BREAK_DURATION_SECONDS, DEFAULT_BREAK_DURATION_SECONDS)
+    return raw.coerceIn(MIN_BREAK_DURATION_SECONDS, MAX_BREAK_DURATION_SECONDS)
+  }
+
+  fun setBreakDurationSeconds(context: Context, seconds: Int) {
+    val normalized = seconds.coerceIn(MIN_BREAK_DURATION_SECONDS, MAX_BREAK_DURATION_SECONDS)
+    prefs(context).edit().putInt(KEY_BREAK_DURATION_SECONDS, normalized).apply()
   }
 }

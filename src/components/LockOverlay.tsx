@@ -41,20 +41,18 @@ export default function LockOverlay({ lockSeconds = 15 }: Props) {
 
   return (
     <View
-      className="flex-1 bg-black/95 justify-center px-6"
+      className="flex-1 justify-center bg-black/95 px-5"
       style={{ paddingTop: topPad }}>
-      <View className="bg-focus-card rounded-3xl p-6 border border-violet-500/30">
-        <Text className="text-center text-focus-primary text-sm font-bold uppercase tracking-widest mb-2">
+      <View className="rounded-[22px] border border-[#7c3aed]/35 bg-focus-surface/95 p-6">
+        <Text className="mb-2 text-center text-[11px] font-bold uppercase tracking-[0.2em] text-[#c4b5fd]">
           FocusLock
         </Text>
-        <Text className="text-center text-zinc-400 mb-6">
-          এক মিনিটের বেশি ব্যবহার — এখন বিরতি নাও
+        <Text className="mb-6 text-center text-[14px] leading-snug text-focus-muted">
+          You have been on this app for a while — take a short break.
         </Text>
-        <View className="items-center mb-8">
-          <Text className="text-zinc-500 text-sm">সময় বাকি</Text>
-          <Text className="text-5xl font-bold text-white mt-1">
-            {Math.max(0, remaining)}s
-          </Text>
+        <View className="mb-8 items-center">
+          <Text className="text-[13px] text-focus-muted">Time left</Text>
+          <Text className="mt-1 text-5xl font-bold text-white">{Math.max(0, remaining)}s</Text>
         </View>
         <MathQuestion onCorrect={onCorrect} onWrong={onWrong} />
       </View>

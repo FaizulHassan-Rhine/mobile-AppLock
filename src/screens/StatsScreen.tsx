@@ -1,7 +1,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useFocusEffect } from '@react-navigation/native';
-import QuickNav from '../components/QuickNav';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenBackdrop from '../components/ScreenBackdrop';
 import { LockService } from '../services/LockService';
 
 type StatsState = {
@@ -20,6 +22,7 @@ const KNOWN_LABELS: Record<string, string> = {
 };
 
 export default function StatsScreen() {
+  const tabBarHeight = useBottomTabBarHeight();
   const [state, setState] = useState<StatsState>({
     lockCount: 0,
     monitoredCount: 0,
@@ -28,13 +31,12 @@ export default function StatsScreen() {
   });
 
   const refresh = useCallback(async () => {
-    const [lockCount, monitored, serviceEnabled, foregroundPackage] =
-      await Promise.all([
-        LockService.getLockCountToday(),
-        LockService.getMonitoredPackages(),
-        LockService.isServiceEnabled(),
-        LockService.getForegroundPackageName(),
-      ]);
+    const [lockCount, monitored, serviceEnabled, foregroundPackage] = await Promise.all([
+      LockService.getLockCountToday(),
+      LockService.getMonitoredPackages(),
+      LockService.isServiceEnabled(),
+      LockService.getForegroundPackageName(),
+    ]);
     setState({
       lockCount,
       monitoredCount: monitored.length,
@@ -54,59 +56,74 @@ export default function StatsScreen() {
   }, [state.foregroundPackage]);
 
   return (
-    <ScrollView className="flex-1 bg-focus-bg">
-      <View className="px-5 pt-12 pb-10">
-        <Text className="text-3xl font-bold text-white mb-1">Stats & Diagnostics</Text>
-        <Text className="text-zinc-500 mb-2">
-          Verify if FocusLock can detect apps and trigger locks correctly.
-        </Text>
-        <QuickNav active="Stats" />
-
-        <View className="bg-focus-card rounded-2xl p-5 mt-4 mb-3 border border-zinc-800">
-          <Text className="text-zinc-400 text-sm mb-1">Locked today</Text>
-          <Text className="text-3xl font-bold text-white">{state.lockCount}</Text>
-        </View>
-
-        <View className="bg-focus-card rounded-2xl p-5 mb-3 border border-zinc-800">
-          <Text className="text-zinc-400 text-sm mb-1">Service status</Text>
-          <Text
-            className={
-              state.serviceEnabled
-                ? 'text-emerald-400 font-semibold'
-                : 'text-amber-400 font-semibold'
-            }>
-            {state.serviceEnabled ? 'Running' : 'Stopped'}
-          </Text>
-        </View>
-
-        <View className="bg-focus-card rounded-2xl p-5 mb-3 border border-zinc-800">
-          <Text className="text-zinc-400 text-sm mb-1">Monitored app count</Text>
-          <Text className="text-white text-xl font-semibold">{state.monitoredCount}</Text>
-        </View>
-
-        <View className="bg-focus-card rounded-2xl p-5 mb-3 border border-zinc-800">
-          <Text className="text-zinc-400 text-sm mb-1">Current foreground app</Text>
-          <Text className="text-white text-base font-semibold">{foregroundLabel}</Text>
-          <Text className="text-zinc-500 text-xs mt-1">{state.foregroundPackage}</Text>
-        </View>
-
-        <View className="bg-focus-card rounded-2xl p-5 mb-3 border border-zinc-800">
-          <Text className="text-zinc-400 text-sm mb-2">Debug action</Text>
-          <Pressable
-            onPress={LockService.pauseActiveMedia}
-            className="bg-zinc-900 py-3 rounded-xl border border-zinc-700">
-            <Text className="text-center text-zinc-100 font-semibold">
-              Send pause media command now
+    <ScreenBackdrop>
+      <SafeAreaView className="flex-1" edges={['top']}>
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ paddingBottom: tabBarHeight + 20 }}
+          showsVerticalScrollIndicator={false}>
+          <View className="px-4 pb-4 pt-2">
+            <Text className="text-[28px] font-bold text-white" style={{ letterSpacing: 0.2 }}>
+              Stats
             </Text>
-          </Pressable>
-        </View>
+            <Text className="mt-1.5 text-[14px] leading-[1.45] text-focus-muted">
+              Live diagnostics: locks, service state, and foreground detection.
+            </Text>
 
-        <Pressable
-          onPress={refresh}
-          className="py-3 mt-2 border border-zinc-700 rounded-xl">
-          <Text className="text-center text-zinc-300">Refresh diagnostics</Text>
-        </Pressable>
-      </View>
-    </ScrollView>
+            <View className="mt-5 rounded-[18px] border border-focus-border bg-focus-surface/95 p-4">
+              <Text className="text-[12px] font-semibold uppercase tracking-wide text-focus-muted">
+                Locks today
+              </Text>
+              <Text className="mt-1 text-[30px] font-bold text-white">{state.lockCount}</Text>
+            </View>
+
+            <View className="mt-3 rounded-[18px] border border-focus-border bg-focus-surface/95 p-4">
+              <View className="flex-row flex-wrap justify-between gap-3">
+                <View>
+                  <Text className="text-[12px] font-semibold uppercase tracking-wide text-focus-muted">
+                    Service
+                  </Text>
+                  <Text
+                    className={`mt-1 text-[15px] font-bold ${state.serviceEnabled ? 'text-focus-ok' : 'text-focus-warn'}`}>
+                    {state.serviceEnabled ? 'Running' : 'Stopped'}
+                  </Text>
+                </View>
+                <View>
+                  <Text className="text-[12px] font-semibold uppercase tracking-wide text-focus-muted">
+                    Monitored
+                  </Text>
+                  <Text className="mt-1 text-[15px] font-bold text-white">{state.monitoredCount} apps</Text>
+                </View>
+              </View>
+            </View>
+
+            <View className="mt-3 rounded-[18px] border border-focus-border bg-focus-surface/95 p-4">
+              <Text className="text-[12px] font-semibold uppercase tracking-wide text-focus-muted">
+                Current foreground app
+              </Text>
+              <Text className="mt-2 text-[16px] font-bold text-white">{foregroundLabel}</Text>
+              <Text className="mt-1 text-[12px] text-focus-muted">{state.foregroundPackage}</Text>
+            </View>
+
+            <View className="mt-3 rounded-[18px] border border-focus-border bg-focus-surface/95 p-4">
+              <Text className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-focus-muted">
+                Debug
+              </Text>
+              <Pressable
+                onPress={LockService.pauseActiveMedia}
+                className="rounded-xl border border-focus-border bg-[#191925] py-3 active:opacity-90">
+                <Text className="text-center text-[14px] font-bold text-white">Send pause media command</Text>
+              </Pressable>
+            </View>
+
+            <Pressable
+              onPress={refresh}
+              className="mt-3 rounded-xl border border-focus-border py-3.5 active:opacity-90">
+              <Text className="text-center text-[14px] font-semibold text-focus-muted">Refresh diagnostics</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </ScreenBackdrop>
   );
 }

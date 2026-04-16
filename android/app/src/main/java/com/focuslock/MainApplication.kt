@@ -22,5 +22,8 @@ class MainApplication : Application(), ReactApplication {
   override fun onCreate() {
     super.onCreate()
     loadReactNative(this)
+    if (FocusLockStore.isServiceEnabled(applicationContext)) {
+      ServiceRestarter.startMonitorService(applicationContext)
+    }
   }
 }

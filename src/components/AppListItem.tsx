@@ -15,11 +15,11 @@ export default function AppListItem({
   onValueChange,
 }: Props) {
   return (
-    <View className="flex-row items-center justify-between bg-focus-card px-4 py-3 rounded-2xl mb-2 border border-zinc-800">
+    <View className="mb-2 flex-row items-center justify-between rounded-[14px] border border-focus-border bg-[#191925] px-4 py-3.5">
       <View className="flex-1 pr-3">
-        <Text className="text-white text-base font-medium">{title}</Text>
+        <Text className="text-[15px] font-semibold text-white">{title}</Text>
         {subtitle ? (
-          <Text className="text-zinc-500 text-xs mt-0.5" numberOfLines={1}>
+          <Text className="mt-0.5 text-[12px] text-focus-muted" numberOfLines={1}>
             {subtitle}
           </Text>
         ) : null}
@@ -27,7 +27,7 @@ export default function AppListItem({
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: '#333', true: '#7C3AED' }}
+        trackColor={{ false: '#3f3f46', true: '#7c3aed' }}
         thumbColor="#f4f4f5"
       />
     </View>

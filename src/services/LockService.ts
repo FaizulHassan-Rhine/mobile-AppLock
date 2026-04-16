@@ -15,6 +15,10 @@ type NativeService = {
   setMonitoredPackages: (packages: string[]) => void;
   getMonitoredPackages: () => Promise<string[]>;
   getLockCountToday: () => Promise<number>;
+  getUsageThresholdSeconds: () => Promise<number>;
+  setUsageThresholdSeconds: (seconds: number) => void;
+  getBreakDurationSeconds: () => Promise<number>;
+  setBreakDurationSeconds: (seconds: number) => void;
   dismissLockOverlay: () => void;
   getForegroundPackageName: () => Promise<string>;
   pauseActiveMedia: () => void;
@@ -49,6 +53,14 @@ export const LockService = {
   getMonitoredPackages: () =>
     native?.getMonitoredPackages() ?? Promise.resolve([]),
   getLockCountToday: () => native?.getLockCountToday() ?? Promise.resolve(0),
+  getUsageThresholdSeconds: () =>
+    native?.getUsageThresholdSeconds() ?? Promise.resolve(60),
+  setUsageThresholdSeconds: (seconds: number) =>
+    native?.setUsageThresholdSeconds(seconds),
+  getBreakDurationSeconds: () =>
+    native?.getBreakDurationSeconds() ?? Promise.resolve(15),
+  setBreakDurationSeconds: (seconds: number) =>
+    native?.setBreakDurationSeconds(seconds),
   dismissLockOverlay: () => native?.dismissLockOverlay(),
   getForegroundPackageName: () =>
     native?.getForegroundPackageName() ?? Promise.resolve('unknown'),

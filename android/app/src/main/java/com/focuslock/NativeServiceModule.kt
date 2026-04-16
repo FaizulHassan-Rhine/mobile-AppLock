@@ -27,12 +27,7 @@ class NativeServiceModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun startMonitorService() {
     FocusLockStore.setServiceEnabled(appContext(), true)
-    val intent = Intent(appContext(), AppMonitorService::class.java)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      appContext().startForegroundService(intent)
-    } else {
-      appContext().startService(intent)
-    }
+    ServiceRestarter.startMonitorService(appContext())
   }
 
   @ReactMethod
@@ -165,6 +160,26 @@ class NativeServiceModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun getLockCountToday(promise: Promise) {
     promise.resolve(FocusLockStore.getLockCountToday(appContext()))
+  }
+
+  @ReactMethod
+  fun getUsageThresholdSeconds(promise: Promise) {
+    promise.resolve(FocusLockStore.getUsageThresholdSeconds(appContext()))
+  }
+
+  @ReactMethod
+  fun setUsageThresholdSeconds(seconds: Double) {
+    FocusLockStore.setUsageThresholdSeconds(appContext(), seconds.toInt())
+  }
+
+  @ReactMethod
+  fun getBreakDurationSeconds(promise: Promise) {
+    promise.resolve(FocusLockStore.getBreakDurationSeconds(appContext()))
+  }
+
+  @ReactMethod
+  fun setBreakDurationSeconds(seconds: Double) {
+    FocusLockStore.setBreakDurationSeconds(appContext(), seconds.toInt())
   }
 
   @ReactMethod

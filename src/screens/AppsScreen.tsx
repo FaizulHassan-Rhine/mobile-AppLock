@@ -9,9 +9,11 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useFocusEffect } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AppListItem from '../components/AppListItem';
-import QuickNav from '../components/QuickNav';
+import ScreenBackdrop from '../components/ScreenBackdrop';
 import { LockService } from '../services/LockService';
 
 const KNOWN_LABELS: Record<string, string> = {
@@ -23,11 +25,10 @@ const KNOWN_LABELS: Record<string, string> = {
 };
 
 export default function AppsScreen() {
+  const tabBarHeight = useBottomTabBarHeight();
   const [monitored, setMonitored] = useState<string[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [apps, setApps] = useState<Array<{ packageName: string; label: string }>>(
-    [],
-  );
+  const [apps, setApps] = useState<Array<{ packageName: string; label: string }>>([]);
   const [query, setQuery] = useState('');
   const [loadingApps, setLoadingApps] = useState(false);
 
@@ -79,8 +80,7 @@ export default function AppsScreen() {
     }
     return apps.filter(
       a =>
-        a.label.toLowerCase().includes(q) ||
-        a.packageName.toLowerCase().includes(q),
+        a.label.toLowerCase().includes(q) || a.packageName.toLowerCase().includes(q),
     );
   }, [apps, query]);
 
@@ -94,95 +94,100 @@ export default function AppsScreen() {
   );
 
   return (
-    <ScrollView className="flex-1 bg-focus-bg">
-      <View className="px-5 pt-12 pb-10">
-        <Text className="text-3xl font-bold text-white mb-1">Apps</Text>
-        <Text className="text-zinc-500 mb-2">
-          Choose which apps trigger the 1-minute lock challenge.
-        </Text>
-        <QuickNav active="Apps" />
+    <ScreenBackdrop>
+      <SafeAreaView className="flex-1" edges={['top']}>
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ paddingBottom: tabBarHeight + 20 }}
+          showsVerticalScrollIndicator={false}>
+          <View className="px-4 pb-4 pt-2">
+            <Text className="text-[28px] font-bold text-white" style={{ letterSpacing: 0.2 }}>
+              Apps
+            </Text>
+            <Text className="mt-1.5 text-[14px] leading-[1.45] text-focus-muted">
+              Choose which apps trigger the one-minute lock challenge.
+            </Text>
 
-        <View className="flex-row items-center justify-between mb-3 mt-4">
-          <Text className="text-white text-lg font-semibold">Monitored apps</Text>
-          <Pressable
-            onPress={openPicker}
-            className="bg-focus-primary/20 px-3 py-2 rounded-lg border border-focus-primary/40">
-            <Text className="text-focus-primary font-semibold text-sm">Add app</Text>
-          </Pressable>
-        </View>
-
-        {displayList.length === 0 ? (
-          <Text className="text-zinc-500 mb-4">
-            No apps selected. Tap "Add app" to start.
-          </Text>
-        ) : (
-          displayList.map(({ pkg, label }) => (
-            <AppListItem
-              key={pkg}
-              title={label}
-              subtitle={pkg}
-              value
-              onValueChange={v => togglePackage(pkg, v)}
-            />
-          ))
-        )}
-      </View>
-
-      <Modal visible={pickerOpen} animationType="slide" transparent>
-        <View className="flex-1 bg-black/70 justify-end">
-          <View className="bg-focus-bg rounded-t-3xl max-h-[85%] border border-zinc-800">
-            <View className="p-4 border-b border-zinc-800 flex-row items-center justify-between">
-              <Text className="text-white text-lg font-bold">Choose apps</Text>
-              <Pressable onPress={() => setPickerOpen(false)}>
-                <Text className="text-focus-primary font-semibold">Close</Text>
+            <View className="mt-5 flex-row items-center justify-between">
+              <Text className="text-[16px] font-semibold text-white">Monitored apps</Text>
+              <Pressable
+                onPress={openPicker}
+                className="rounded-xl border border-[#7c3aed]/55 bg-focus-primarySoft px-3 py-2 active:opacity-90">
+                <Text className="text-[13px] font-bold text-[#c4b5fd]">Add app</Text>
               </Pressable>
             </View>
-            <TextInput
-              placeholder="Search apps..."
-              placeholderTextColor="#666"
-              value={query}
-              onChangeText={setQuery}
-              className="mx-4 mt-3 mb-2 bg-focus-card text-white px-4 py-3 rounded-xl border border-zinc-800"
-            />
-            {loadingApps ? (
-              <View className="py-8 items-center">
-                <ActivityIndicator color="#7C3AED" />
-              </View>
+
+            {displayList.length === 0 ? (
+              <Text className="mb-4 mt-3 text-[14px] text-focus-muted">
+                No apps selected. Tap &quot;Add app&quot; to start.
+              </Text>
             ) : (
-              <FlatList
-                data={filteredApps}
-                keyExtractor={item => item.packageName}
-                contentContainerClassName="px-4 pb-24"
-                renderItem={({ item }) => {
-                  const on = monitored.includes(item.packageName);
-                  return (
-                    <Pressable
-                      onPress={() => {
-                        togglePackage(item.packageName, !on);
-                      }}
-                      className="flex-row items-center justify-between py-3 border-b border-zinc-900">
-                      <View className="flex-1 pr-3">
-                        <Text className="text-white font-medium">{item.label}</Text>
-                        <Text
-                          className="text-zinc-500 text-xs mt-0.5"
-                          numberOfLines={1}>
-                          {item.packageName}
-                        </Text>
-                      </View>
-                      <Text
-                        className={
-                          on ? 'text-emerald-400 font-semibold' : 'text-zinc-500'
-                        }>
-                        {on ? 'Added' : 'Add'}
-                      </Text>
-                    </Pressable>
-                  );
-                }}
-              />
+              <View className="mt-3">
+                {displayList.map(({ pkg, label }) => (
+                  <AppListItem
+                    key={pkg}
+                    title={label}
+                    subtitle={pkg}
+                    value
+                    onValueChange={v => togglePackage(pkg, v)}
+                  />
+                ))}
+              </View>
             )}
           </View>
-        </View>
-      </Modal>
-    </ScrollView>
+        </ScrollView>
+
+        <Modal visible={pickerOpen} animationType="slide" transparent>
+          <View className="flex-1 justify-end bg-black/75">
+            <View className="max-h-[85%] rounded-t-3xl border border-focus-border bg-[#0f0f16]">
+              <View className="flex-row items-center justify-between border-b border-focus-border p-4">
+                <Text className="text-[18px] font-bold text-white">Add monitored app</Text>
+                <Pressable onPress={() => setPickerOpen(false)} hitSlop={12}>
+                  <Text className="text-[14px] font-bold text-[#c4b5fd]">Close</Text>
+                </Pressable>
+              </View>
+              <TextInput
+                placeholder="Search by name or package..."
+                placeholderTextColor="#71717a"
+                value={query}
+                onChangeText={setQuery}
+                className="mx-4 mb-2 mt-3 rounded-xl border border-focus-border bg-[#10101a] px-4 py-3 text-[15px] text-white"
+              />
+              {loadingApps ? (
+                <View className="items-center py-10">
+                  <ActivityIndicator color="#7c3aed" />
+                </View>
+              ) : (
+                <FlatList
+                  data={filteredApps}
+                  keyExtractor={item => item.packageName}
+                  contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: tabBarHeight + 24 }}
+                  keyboardShouldPersistTaps="handled"
+                  renderItem={({ item }) => {
+                    const on = monitored.includes(item.packageName);
+                    return (
+                      <Pressable
+                        onPress={() => togglePackage(item.packageName, !on)}
+                        className="flex-row items-center justify-between border-b border-[#1a1a24] py-3 active:opacity-80">
+                        <View className="flex-1 pr-3">
+                          <Text className="text-[15px] font-medium text-white">{item.label}</Text>
+                          <Text className="mt-0.5 text-[12px] text-focus-muted" numberOfLines={1}>
+                            {item.packageName}
+                          </Text>
+                        </View>
+                        <Text
+                          className={`text-[13px] font-bold ${on ? 'text-focus-ok' : 'text-focus-muted'}`}>
+                          {on ? 'Added' : 'Add'}
+                        </Text>
+                      </Pressable>
+                    );
+                  }}
+                />
+              )}
+            </View>
+          </View>
+        </Modal>
+      </SafeAreaView>
+    </ScreenBackdrop>
   );
 }

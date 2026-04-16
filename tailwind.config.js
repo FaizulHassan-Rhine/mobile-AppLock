@@ -10,9 +10,16 @@ module.exports = {
     extend: {
       colors: {
         focus: {
-          bg: '#0F0F0F',
-          card: '#1A1A1A',
-          primary: '#7C3AED',
+          bg: '#0b0b10',
+          surface: '#14141c',
+          surfaceSoft: '#1b1b25',
+          border: '#252534',
+          primary: '#7c3aed',
+          primarySoft: 'rgb(124 58 237 / 0.2)',
+          muted: '#9ca3af',
+          ok: '#22c55e',
+          warn: '#f59e0b',
+          danger: '#ef4444',
         },
       },
     },

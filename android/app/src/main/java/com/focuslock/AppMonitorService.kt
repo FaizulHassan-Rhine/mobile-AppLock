@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.app.KeyguardManager
 import android.media.AudioManager
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -17,6 +18,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.view.KeyEvent
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 
 class AppMonitorService : Service() {
 
@@ -41,7 +43,7 @@ class AppMonitorService : Service() {
     super.onCreate()
     instance = this
     createNotificationChannel()
-    startForeground(NOTIFICATION_ID, buildNotification())
+    attachForegroundNotification()
     handler.post(pollRunnable)
   }
 
@@ -57,7 +59,17 @@ class AppMonitorService : Service() {
   override fun onBind(intent: Intent?): IBinder? = null
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    // After OEM "clean" or process restart, ensure we are still a proper foreground service.
+    attachForegroundNotification()
     return START_STICKY
+  }
+
+  override fun onTaskRemoved(rootIntent: Intent?) {
+    super.onTaskRemoved(rootIntent)
+    // Normal recent-task clear must not permanently stop monitoring: restart while user left service on.
+    if (FocusLockStore.isServiceEnabled(applicationContext)) {
+      ServiceRestarter.startMonitorService(applicationContext)
+    }
   }
 
   private fun tick() {
@@ -120,7 +132,7 @@ class AppMonitorService : Service() {
       return
     }
 
-    if (now - usageWindowStartMs >= USAGE_THRESHOLD_MS) {
+    if (now - usageWindowStartMs >= currentUsageThresholdMs()) {
       triggerFreezeBreak(effectiveForeground)
     }
   }
@@ -146,17 +158,18 @@ class AppMonitorService : Service() {
       return
     }
 
+    val breakDurationMs = currentBreakDurationMs()
     breakActive = true
     frozenPackage = foregroundNow
-    breakEndsAtMs = System.currentTimeMillis() + BREAK_DURATION_MS
+    breakEndsAtMs = System.currentTimeMillis() + breakDurationMs
     resetUsageWindow()
     pauseActiveMediaPlayback()
-    FreezeOverlayManager.updateRemaining((BREAK_DURATION_MS / 1000L).toInt())
+    FreezeOverlayManager.updateRemaining((breakDurationMs / 1000L).toInt())
     handler.removeCallbacks(countdownRunnable)
     handler.post(countdownRunnable)
     FocusLockStore.incrementLockCount(applicationContext)
     handler.removeCallbacks(resumeRunnable)
-    handler.postDelayed(resumeRunnable, BREAK_DURATION_MS)
+    handler.postDelayed(resumeRunnable, breakDurationMs)
   }
 
   fun onOverlayDismissedFromNative() {
@@ -173,10 +186,30 @@ class AppMonitorService : Service() {
           NotificationChannel(
               CHANNEL_ID,
               "FocusLock monitoring",
-              NotificationManager.IMPORTANCE_LOW,
+              NotificationManager.IMPORTANCE_DEFAULT,
           )
       ch.description = "Keeps FocusLock active to monitor app usage"
+      ch.setSound(null, null)
+      ch.enableVibration(false)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        ch.setBlockable(false)
+      }
       (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(ch)
+    }
+  }
+
+  private fun attachForegroundNotification() {
+    val notification = buildNotification()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      ServiceCompat.startForeground(
+          this,
+          NOTIFICATION_ID,
+          notification,
+          ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
+      )
+    } else {
+      @Suppress("DEPRECATION")
+      startForeground(NOTIFICATION_ID, notification)
     }
   }
 
@@ -192,13 +225,24 @@ class AppMonitorService : Service() {
             launchIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-    return NotificationCompat.Builder(this, CHANNEL_ID)
-        .setContentTitle("FocusLock")
-        .setContentText("Monitoring distracting apps")
-        .setSmallIcon(android.R.drawable.ic_lock_lock)
-        .setContentIntent(pi)
-        .setOngoing(true)
-        .build()
+    val b =
+        NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("FocusLock")
+            .setContentText("Monitoring in background — do not dismiss to keep locks working")
+            .setSmallIcon(android.R.drawable.ic_lock_lock)
+            .setContentIntent(pi)
+            .setOngoing(true)
+            .setAutoCancel(false)
+            .setOnlyAlertOnce(true)
+            .setSilent(true)
+            .setCategory(Notification.CATEGORY_SERVICE)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+    // Android 14+: show FGS notification immediately (less likely to be treated as dismissible/minimized).
+    if (Build.VERSION.SDK_INT >= 34) {
+      b.setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+    }
+    return b.build()
   }
 
   private val resumeRunnable =
@@ -241,6 +285,12 @@ class AppMonitorService : Service() {
     activeMonitoredPackage = null
     usageWindowStartMs = 0L
   }
+
+  private fun currentUsageThresholdMs(): Long =
+      FocusLockStore.getUsageThresholdSeconds(applicationContext).toLong() * 1000L
+
+  private fun currentBreakDurationMs(): Long =
+      FocusLockStore.getBreakDurationSeconds(applicationContext).toLong() * 1000L
 
   private fun pauseActiveMediaPlayback() {
     dispatchMediaWithFallback(
@@ -330,11 +380,10 @@ class AppMonitorService : Service() {
   }
 
   companion object {
-    private const val CHANNEL_ID = "focuslock_monitor"
+    /** New id so channel importance / blockable settings apply on upgrade installs. */
+    private const val CHANNEL_ID = "focuslock_fgs_v2"
     private const val NOTIFICATION_ID = 71042
     private const val POLL_INTERVAL_MS = 2000L
-    private const val USAGE_THRESHOLD_MS = 60_000L
-    private const val BREAK_DURATION_MS = 15_000L
     private const val MEDIA_RECHECK_DELAY_MS = 350L
     private const val FOREGROUND_GRACE_MS = 8_000L
 
